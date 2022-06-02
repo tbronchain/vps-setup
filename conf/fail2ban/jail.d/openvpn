@@ -1,0 +1,11 @@
+# Fail2Ban configuration fragment for OpenVPN
+
+[openvpn]
+enabled  = true
+port     = ${_OPENVPN_PORTS}
+protocol = udp,tcp
+action_  = %(default/action_)s[name=%(__name__)s-tcp, protocol="tcp"]
+           %(default/action_)s[name=%(__name__)s-udp, protocol="udp"]
+filter   = openvpn
+logpath  = /var/log/openvpn.log
+maxretry = 3
