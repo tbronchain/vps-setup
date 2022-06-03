@@ -13,9 +13,11 @@ sudo bash -ex scripts/bootstrap.sh
 gPUBLIC_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
 ANCHOR_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/anchor_ipv4/address)
 
+
 # configure ssh
 envsubst < conf/ssh/sshd_config | sudo tee /etc/ssh/sshd_config
 sudo systemctl restart sshd
+
 
 # configure ufw firewall
 sudo ufw default deny incoming
@@ -85,9 +87,37 @@ gen_wg_net_client ${WIREGUARD_CLIENTS[@]}
 
 
 # install unbound
+sudo apt install -y unbound
+sudo mkdir -p /etc/unbound/unbound.conf.d
+envsubst < conf/unbound/pi-hole.conf | sudo tee /etc/unbound/unbound.conf.d/pi-hole.conf
+sudo mkdir -p /etc/dnsmasq.d
+echo 'edns-packet-max=1232' | sudo tee /etc/dnsmasq.d/99-edns.conf
+sudo systemctl enable unbound
+sudo systemctl restart unbound
+dig pi-hole.net @127.0.0.1 -p 5335
+dig sigfail.verteiltesysteme.net @127.0.0.1 -p 5335
+dig sigok.verteiltesysteme.net @127.0.0.1 -p 5335
 
 
 # install cloudflared
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+sudo apt install -y ./cloudflared-linux-amd64.deb
+rm -f ./cloudflared-linux-amd64.deb
+cloudflared -v
+sudo useradd -s /usr/sbin/nologin -r -M cloudflared
+if ! grep 'CLOUDFLARED_OPTS=' /etc/default/cloudflared; then
+    (cat | sudo tee /etc/default/cloudflared) <<EOF
+# Commandline args for cloudflared, using Cloudflare DNS
+CLOUDFLARED_OPTS="--port 5053 --upstream https://1.1.1.1/dns-query --upstream https://1.0.0.1/dns-query"
+EOF
+fi
+sudo chown cloudflared:cloudflared /etc/default/cloudflared
+sudo chown cloudflared:cloudflared /usr/local/bin/cloudflared
+envsubst < conf/cloudflared/cloudflared.service | sudo tee /etc/systemd/system/cloudflared.service
+sudo systemctl enable cloudflared
+sudo systemctl start cloudflared
+sudo systemctl status cloudflared
+dig @127.0.0.1 -p 5053 google.com
 
 
 # install pi-hole
