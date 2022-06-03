@@ -10,7 +10,7 @@ mkdir -p "${OUTDIR}"
 
 sudo bash -ex scripts/bootstrap.sh
 
-PUBLIC_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+gPUBLIC_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
 ANCHOR_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/anchor_ipv4/address)
 
 # configure ssh
@@ -25,9 +25,7 @@ sudo ufw allow from any to ${ANCHOR_IP} port ${SSH_PORT}
 for _PORT in "${OPENVPN_ALL_PORTS[@]}"; do
     sudo ufw allow from any to ${ANCHOR_IP} port ${_PORT}
 done
-for _PORT in "${WIREGUARD_PORTS[@]}"; do
-    sudo ufw allow from any to ${ANCHOR_IP} port ${_PORT}
-done
+sudo ufw allow from any to ${ANCHOR_IP} port ${WIREGUARD_PORT}
 sudo ufw enable
 
 
@@ -70,6 +68,26 @@ gen_ovpn_server_conf udp --dns-only ${OPENVPN_UDP_DNS_PORTS[@]}
 
 
 # config wireguard
+sudo apt-get install -y wireguard wireguard-tools qrencode
+sudo mkdir -p /etc/wireguard
+sudo wg genkey | sudo tee /etc/wireguard/server.key | sudo wg pubkey | sudo tee /etc/wireguard/server.pub
+(cat | sudo tee /etc/wireguard/wg0.conf) <<EOF
+[Interface]
+Address = 10.100.0.1/24, fd08:4711::1/64
+ListenPort = ${WIREGUARD_PORT}
+EOF
+echo "PrivateKey = $(sudo cat /etc/wireguard/server.key)" | sudo tee /etc/wireguard/wg0.conf
+sudo systemctl enable wg-quick@wg0.service
+sudo systemctl daemon-reload
+sudo systemctl start wg-quick@wg0
+sudo wg
+gen_wg_net_client ${WIREGUARD_CLIENTS[@]}
+
+
+# install unbound
+
+
+# install cloudflared
 
 
 # install pi-hole

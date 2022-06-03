@@ -1,4 +1,4 @@
-new_client () {
+function gen_ovpn_new_client () {
     local _CLIENT="$1"
     local _PROTO="$2"
     local _PORT="$3"
@@ -8,18 +8,50 @@ new_client () {
         # Generates the custom client.ovpn
         envsubst < conf/openvpn/client-common.txt
         echo "<ca>"
-        cat /etc/openvpn/server/easy-rsa/pki/ca.crt
+        sudo cat /etc/openvpn/server/easy-rsa/pki/ca.crt
         echo "</ca>"
         echo "<cert>"
-        sed -ne '/BEGIN CERTIFICATE/,$ p' /etc/openvpn/server/easy-rsa/pki/issued/"${_CLIENT}".crt
+        sudo sed -ne '/BEGIN CERTIFICATE/,$ p' /etc/openvpn/server/easy-rsa/pki/issued/"${_CLIENT}".crt
         echo "</cert>"
         echo "<key>"
-        cat /etc/openvpn/server/easy-rsa/pki/private/"${_CIENT}".key
+        sudo cat /etc/openvpn/server/easy-rsa/pki/private/"${_CIENT}".key
         echo "</key>"
         echo "<tls-crypt>"
-        sed -ne '/BEGIN OpenVPN Static key/,$ p' /etc/openvpn/server/tc.key
+        sudo sed -ne '/BEGIN OpenVPN Static key/,$ p' /etc/openvpn/server/tc.key
         echo "</tls-crypt>"
     } > "${OUTDIR}"/"${_CLIENT}_${_PROTO}_${_PORT}".ovpn
+}
+
+function gen_wg_net_client () {
+    _CLIENT_ID=2
+    for _client in $@; do
+        sudo wg genkey | sudo tee "/etc/wireguard/${_client}.key" | sudo wg pubkey | sudo tee "/etc/wireguard/${_client}.pub"
+        sudo wg genpsk | sudo tee "/etc/wireguard/${_client}.psk"
+        {
+            echo "[Peer]"
+            echo "PublicKey = $(sudo cat /etc/wireguard/${_client}.pub)"
+            echo "PresharedKey = $(sudo cat /etc/wireguard/${_client}.psk)"
+            echo "AllowedIPs = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
+            echo ""
+        } | sudo tee /etc/wireguard/wg0.conf
+        {
+            echo "[Interface]"
+            echo "Address = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
+            echo "DNS = 10.100.0.1"
+            echo "PrivateKey = $(sudo cat /etc/wireguard/${_client}.key)"
+            echo ""
+            cat <<EOF
+[Peer]
+AllowedIPs = 10.100.0.1/32, fd08:4711::1/128
+Endpoint = ${FLOATING_IP}:${WIREGUARD_PORT}
+PersistentKeepalive = 25
+EOF
+            echo "PublicKey = $(sudo cat /etc/wireguard/server.pub)"
+            echo "PresharedKey = $(sudo cat /etc/wireguard/${_client}.psk)"
+        } > "${OUTDIR}"/"wg_${_client}".conf
+        _CLIENT_ID=$((_CLIENT_ID+1))
+    done
+    sudo systemctl restart wg-quick@wg0
 }
 
 function gen_ovpn_server_conf () {
@@ -44,10 +76,10 @@ function gen_ovpn_server_conf () {
             _SNAME="server_${_PROTO}_${_PORT}"
             #./openvpn-install.sh
         fi
-        new_client "client" $_PROTO $_PORT
+        gen_ovpn_new_client "client" $_PROTO $_PORT
         envsubst < conf/openvpn/server.conf | sudo tee /etc/openvpn/server/${_SNAME}.conf
-        systemctl enable openvpn-server@${_SNAME}
-        systemctl restart openvpn-server@${_SNAME}
+        sudo systemctl enable openvpn-server@${_SNAME}
+        sudo systemctl restart openvpn-server@${_SNAME}
         _NET4_ID=$((_NET4_ID+1))
         _NET6_ID=$((_NET6_ID+1))
     done

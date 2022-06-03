@@ -1,7 +1,7 @@
 client
 dev tun
 proto ${_PROTO}
-remote ${PUBLIC_IP} ${_PORT}
+remote ${FLOATING_IP} ${_PORT}
 resolv-retry infinite
 nobind
 persist-key
