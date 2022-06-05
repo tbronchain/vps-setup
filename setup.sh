@@ -81,8 +81,8 @@ sudo wg genkey | sudo tee /etc/wireguard/server.key | sudo wg pubkey | sudo tee 
 [Interface]
 Address = 10.100.0.1/24, fd08:4711::1/64
 ListenPort = ${WIREGUARD_PORT}
+PrivateKey = $(sudo cat /etc/wireguard/server.key)
 EOF
-echo "PrivateKey = $(sudo cat /etc/wireguard/server.key)" | sudo tee /etc/wireguard/wg0.conf
 sudo systemctl enable wg-quick@wg0.service
 sudo systemctl daemon-reload
 sudo systemctl start wg-quick@wg0

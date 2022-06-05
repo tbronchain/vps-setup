@@ -1,7 +1,7 @@
 function gen_ovpn_new_client () {
-    local _CLIENT="$1"
-    local _PROTO="$2"
-    local _PORT="$3"
+    export _CLIENT="$1"
+    export _PROTO="$2"
+    export _PORT="$3"
 
     #EASYRSA_CERT_EXPIRE=3650 ./easyrsa build-client-full "${_CLIENT}" nopass
     {
@@ -14,7 +14,7 @@ function gen_ovpn_new_client () {
         sudo sed -ne '/BEGIN CERTIFICATE/,$ p' /etc/openvpn/server/easy-rsa/pki/issued/"${_CLIENT}".crt
         echo "</cert>"
         echo "<key>"
-        sudo cat /etc/openvpn/server/easy-rsa/pki/private/"${_CIENT}".key
+        sudo cat /etc/openvpn/server/easy-rsa/pki/private/"${_CLIENT}".key
         echo "</key>"
         echo "<tls-crypt>"
         sudo sed -ne '/BEGIN OpenVPN Static key/,$ p' /etc/openvpn/server/tc.key
@@ -55,21 +55,22 @@ EOF
 }
 
 function gen_ovpn_server_conf () {
-    _PROTO="$1"
-    shift 1
-    if [[ "$2" != "--dns-only" ]]; then
-        _REDIRECT='push "redirect-gateway def1 ipv6 bypass-dhcp"'
+    export _PROTO="$1"
+    shift
+    if [[ "$1" != "--dns-only" ]]; then
+        export _REDIRECT='push "redirect-gateway def1 ipv6 bypass-dhcp"'
     else
-        _REDIRECT=''
-        shift 1
+        export _REDIRECT=''
+        shift
     fi
 
     export _NET4_ID
     export _NET6_ID
     for _PORT in $@; do
-        _NETWORK="server 10.${_NET4_ID}.0.0 255.255.255.0"
-        _NETWORK_V6="server-ipv6 fddd:${_NET6_ID}:1194:1194::/64"
-        _SERVER="10.${_NET4_ID}.0.1"
+        export _PORT
+        export _NETWORK="server 10.${_NET4_ID}.0.0 255.255.255.0"
+        export _NETWORK_V6="server-ipv6 fddd:${_NET6_ID}:1194:1194::/64"
+        export _SERVER="10.${_NET4_ID}.0.1"
         if [[ ${_NET4_ID} -eq 8 ]]; then
             _SNAME="server"
         else
