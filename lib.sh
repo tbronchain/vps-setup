@@ -79,9 +79,17 @@ function gen_ovpn_server_conf () {
         fi
         gen_ovpn_new_client "client" $_PROTO $_PORT
         envsubst < conf/openvpn/server.conf | sudo tee /etc/openvpn/server/${_SNAME}.conf
+        ufw_vpn_rules "10.${_NET4_ID}.0.0/24"
         sudo systemctl enable openvpn-server@${_SNAME}
         sudo systemctl restart openvpn-server@${_SNAME}
         _NET4_ID=$((_NET4_ID+1))
         _NET6_ID=$((_NET6_ID+1))
     done
+}
+
+function ufw_vpn_rules () {
+    local _NETWORK="$1"
+
+    sudo ufw allow in from ${_NETWORK} to any port 53 proto udp
+    sudo ufw allow in from ${_NETWORK} to any port 80,6666,8080,2342 proto tcp
 }

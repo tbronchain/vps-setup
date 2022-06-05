@@ -83,6 +83,7 @@ Address = 10.100.0.1/24, fd08:4711::1/64
 ListenPort = ${WIREGUARD_PORT}
 PrivateKey = $(sudo cat /etc/wireguard/server.key)
 EOF
+ufw_vpn_rules "10.100.0.0/24"
 sudo systemctl enable wg-quick@wg0.service
 sudo systemctl daemon-reload
 sudo systemctl start wg-quick@wg0
