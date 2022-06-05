@@ -108,7 +108,7 @@ wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudfla
 sudo apt install -y ./cloudflared-linux-amd64.deb
 rm -f ./cloudflared-linux-amd64.deb
 cloudflared -v
-if ! grep Cloudflared /etc/passwd; then
+if ! grep cloudflared /etc/passwd; then
     sudo useradd -s /usr/sbin/nologin -r -M cloudflared
 fi
 (cat | sudo tee /etc/default/cloudflared) <<EOF
