@@ -121,7 +121,12 @@ dig @127.0.0.1 -p 5053 google.com
 
 
 # install pi-hole
-curl -sSL https://install.pi-hole.net | bash
+#curl -sSL https://install.pi-hole.net | bash
+curl -L https://install.pi-hole.net > pihole.sh
+chmod +x pihole.sh
+export PIHOLE_SKIP_OS_CHECK=true
+sudo -E bash /dev/stdin --unattended < pihole.sh
+rm -f pihole.sh
 
 
 # EOF
