@@ -135,7 +135,8 @@ if ! pihole -v; then
     rm -f pihole.sh
 else
     sudo pihole -up
-    sudo pihole -r
+    export PIHOLE_SKIP_OS_CHECK=true
+    sudo -E pihole -r
 fi
 
 
