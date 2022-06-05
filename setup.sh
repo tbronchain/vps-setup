@@ -25,11 +25,11 @@ sudo systemctl restart sshd
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 # allow in traffic from floatting IP only
-sudo ufw allow from any to ${ANCHOR_IP} port ${SSH_PORT}
+sudo ufw allow from any to ${PUBLIC_IP} port ${SSH_PORT}
 for _PORT in "${OPENVPN_ALL_PORTS[@]}"; do
-    sudo ufw allow from any to ${ANCHOR_IP} port ${_PORT}
+    sudo ufw allow from any to ${PUBLIC_IP} port ${_PORT}
 done
-sudo ufw allow from any to ${ANCHOR_IP} port ${WIREGUARD_PORT}
+sudo ufw allow from any to ${PUBLIC_IP} port ${WIREGUARD_PORT}
 sudo ufw enable
 
 

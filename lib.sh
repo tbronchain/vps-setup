@@ -33,7 +33,7 @@ function gen_wg_net_client () {
             echo "PresharedKey = $(sudo cat /etc/wireguard/${_client}.psk)"
             echo "AllowedIPs = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
             echo ""
-        } | sudo tee /etc/wireguard/wg0.conf
+        } | sudo tee -a /etc/wireguard/wg0.conf
         {
             echo "[Interface]"
             echo "Address = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
@@ -43,7 +43,7 @@ function gen_wg_net_client () {
             cat <<EOF
 [Peer]
 AllowedIPs = 10.100.0.1/32, fd08:4711::1/128
-Endpoint = ${FLOATING_IP}:${WIREGUARD_PORT}
+Endpoint = ${PUBLIC_IP}:${WIREGUARD_PORT}
 PersistentKeepalive = 25
 EOF
             echo "PublicKey = $(sudo cat /etc/wireguard/server.pub)"
