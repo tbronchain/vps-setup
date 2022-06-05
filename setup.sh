@@ -10,7 +10,7 @@ mkdir -p "${OUTDIR}"
 
 sudo bash -ex scripts/bootstrap.sh
 
-gPUBLIC_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+PUBLIC_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
 ANCHOR_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/anchor_ipv4/address)
 
 
