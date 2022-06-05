@@ -135,6 +135,7 @@ if ! pihole -v; then
     rm -f pihole.sh
 else
     sudo pihole -up
+    sudo pihole -r
 fi
 
 
