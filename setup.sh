@@ -63,7 +63,7 @@ wget https://github.com/Nyr/openvpn-install/raw/master/openvpn-install.sh
 chmod 755 openvpn-install.sh
 echo 'Name your client `client` in order to get the script to work...'
 sleep 2
-./openvpn-install.sh
+sudo ./openvpn-install.sh
 sudo touch /var/log/openvpn.log
 _NET4_ID=8
 _NET6_ID=1194
@@ -108,13 +108,13 @@ wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudfla
 sudo apt install -y ./cloudflared-linux-amd64.deb
 rm -f ./cloudflared-linux-amd64.deb
 cloudflared -v
-sudo useradd -s /usr/sbin/nologin -r -M cloudflared
-if ! grep 'CLOUDFLARED_OPTS=' /etc/default/cloudflared; then
-    (cat | sudo tee /etc/default/cloudflared) <<EOF
+if ! grep Cloudflared /etc/passwd; then
+    sudo useradd -s /usr/sbin/nologin -r -M cloudflared
+fi
+(cat | sudo tee /etc/default/cloudflared) <<EOF
 # Commandline args for cloudflared, using Cloudflare DNS
 CLOUDFLARED_OPTS="--port 5053 --upstream https://1.1.1.1/dns-query --upstream https://1.0.0.1/dns-query"
 EOF
-fi
 sudo chown cloudflared:cloudflared /etc/default/cloudflared
 sudo chown cloudflared:cloudflared /usr/local/bin/cloudflared
 envsubst < conf/cloudflared/cloudflared.service | sudo tee /etc/systemd/system/cloudflared.service
@@ -125,12 +125,16 @@ dig @127.0.0.1 -p 5053 google.com
 
 
 # install pi-hole
-#curl -sSL https://install.pi-hole.net | bash
-curl -L https://install.pi-hole.net > pihole.sh
-chmod +x pihole.sh
-export PIHOLE_SKIP_OS_CHECK=true
-sudo -E bash /dev/stdin --unattended < pihole.sh
-rm -f pihole.sh
+if ! pihole -v; then
+    #curl -sSL https://install.pi-hole.net | bash
+    curl -L https://install.pi-hole.net > pihole.sh
+    chmod +x pihole.sh
+    export PIHOLE_SKIP_OS_CHECK=true
+    sudo -E bash /dev/stdin --unattended < pihole.sh
+    rm -f pihole.sh
+else
+    sudo pihole -up
+fi
 
 
 # EOF
