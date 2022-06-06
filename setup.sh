@@ -153,6 +153,7 @@ else
 fi
 sudo cp -f conf/pihole/dnsmasq.d/* /etc/dnsmasq.d/
 sudo cp -f conf/pihole/etc/* /etc/pihole/
+sudo python3 vendors/whitelist/scripts/whitelist.py
 
 
 # save rules
