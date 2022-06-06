@@ -30,6 +30,7 @@ for _PORT in "${OPENVPN_ALL_PORTS[@]}"; do
     sudo ufw allow from any to ${PUBLIC_IP} port ${_PORT}
 done
 sudo ufw allow from any to ${PUBLIC_IP} port ${WIREGUARD_PORT}
+sudo cp -f conf/ufw/* /etc/ufw/
 sudo ufw enable
 
 
