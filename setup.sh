@@ -12,6 +12,7 @@ sudo bash -ex scripts/bootstrap.sh
 
 export PUBLIC_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
 export ANCHOR_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/anchor_ipv4/address)
+export PUBLIC6_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv6/address)
 
 
 # configure ssh
@@ -65,6 +66,7 @@ _OPENVPN_PORTS="${_OPENVPN_PORTS%,}"
 envsubst < conf/fail2ban/jail.d/openvpn | sudo tee /etc/fail2ban/jail.d/openvpn
 sudo systemctl restart fail2ban
 
+cp -f conf/openvpn/openvpn-iptables.service.tpl conf/openvpn/openvpn-iptables.service
 
 # config openvpn
 wget https://github.com/Nyr/openvpn-install/raw/master/openvpn-install.sh
@@ -102,6 +104,19 @@ sudo systemctl daemon-reload
 sudo systemctl start wg-quick@wg0
 sudo wg
 gen_wg_net_client ${WIREGUARD_CLIENTS[@]}
+cat >> conf/openvpn/openvpn-iptables.service <<EOF
+ExecStart=/usr/sbin/iptables -t nat -A POSTROUTING -s 10.100.0.0/24 ! -d 10.100.0.0/24 -j SNAT --to ${ANCHOR_IP}
+ExecStart=/usr/sbin/iptables -I FORWARD -s 10.100.0.0/24 -j ACCEPT
+ExecStop=/usr/sbin/iptables -t nat -D POSTROUTING -s 10.100.0.0/24 ! -d 10.100.0.0/24 -j SNAT --to ${ANCHOR_IP}
+ExecStop=/usr/sbin/iptables -D FORWARD -s 10.100.0.0/24 -j ACCEPT
+ExecStart=/usr/sbin/ip6tables -t nat -A POSTROUTING -s fd08:4711::1/64 ! -d fd08:4711::1/64 -j SNAT --to ${PUBLIC6_IP}
+ExecStart=/usr/sbin/ip6tables -I FORWARD -s fd08:4711::1/64 -j ACCEPT
+ExecStop=/usr/sbin/ip6tables -t nat -D POSTROUTING -s fd08:4711::1/64 ! -d fd08:4711::1/64 -j SNAT --to ${PUBLIC6_IP}
+ExecStop=/usr/sbin/ip6tables -D FORWARD -s fd08:4711::1/64 -j ACCEPT
+EOF
+sudo cp -f conf/openvpn/openvpn-iptables.service /etc/systemd/system/openvpn-iptables.service
+sudo systemctl daemon-reload
+sudo systemctl restart openvpn-iptables
 
 
 # install unbound

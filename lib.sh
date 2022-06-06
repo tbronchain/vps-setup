@@ -79,6 +79,16 @@ function gen_ovpn_server_conf () {
             _SNAME="server_${_PROTO}_${_PORT}"
             #./openvpn-install.sh
         fi
+        cat >> conf/openvpn/openvpn-iptables.service <<EOF
+ExecStart=/usr/sbin/iptables -t nat -A POSTROUTING -s 10.${_NET4_ID}.0.0/24 ! -d 10.${_NET4_ID}.0.0/24 -j SNAT --to ${ANCHOR_IP}
+ExecStart=/usr/sbin/iptables -I FORWARD -s 10.${_NET4_ID}.0.0/24 -j ACCEPT
+ExecStop=/usr/sbin/iptables -t nat -D POSTROUTING -s 10.${_NET4_ID}.0.0/24 ! -d 10.${_NET4_ID}.0.0/24 -j SNAT --to ${ANCHOR_IP}
+ExecStop=/usr/sbin/iptables -D FORWARD -s 10.${_NET4_ID}.0.0/24 -j ACCEPT
+ExecStart=/usr/sbin/ip6tables -t nat -A POSTROUTING -s fddd:${_NET6_ID}:1194:1194::/64 ! -d fddd:${_NET6_ID}:1194:1194::/64 -j SNAT --to ${PUBLIC6_IP}
+ExecStart=/usr/sbin/ip6tables -I FORWARD -s fddd:${_NET6_ID}:1194:1194::/64 -j ACCEPT
+ExecStop=/usr/sbin/ip6tables -t nat -D POSTROUTING -s fddd:${_NET6_ID}:1194:1194::/64 ! -d fddd:${_NET6_ID}:1194:1194::/64 -j SNAT --to ${PUBLIC6_IP}
+ExecStop=/usr/sbin/ip6tables -D FORWARD -s fddd:${_NET6_ID}:1194:1194::/64 -j ACCEPT
+EOF
         gen_ovpn_new_client "client" $_PROTO $_PORT
         envsubst < conf/openvpn/server.conf | sudo tee /etc/openvpn/server/${_SNAME}.conf
         ufw_vpn_rules "10.${_NET4_ID}.0.0/24"

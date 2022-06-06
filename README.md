@@ -1,5 +1,42 @@
 # vps-setup
 
+PR welcome!
+
+A set of scripts to deploy a minimal-ish [VPS] server with:
+
+- custom SSH
+- UFW firewall
+- sendmail
+- fail2ban (ssh and openvpn setup)
+- openvpn (tcp + udp)
+- wireguard (udp)
+- unbound
+- cloudflared
+- pi-hole
+- a few extras...
+
+What this is not: a full featured script that does everything for you
+
+What this is: a fairly minimal, comprehensive set of scripts you can use to setup a robust privacy oriented VPN server.
+
+## Requirements
+
+First, check `values.sh` and set what you need, but don't set private credentials. Alternatively, create a `.env` file and set whatever you want, including credentials.
+
+Produced files will be stored under the `./out` directory by default.
+
+The script assumes you have a server setup, and running the script under your unprivileged user with sudo access. It will not configure users or ssh/keys for you.
+
+## Install
+
+Run the script with:
+
+```
+$ ./setup.sh
+```
+
+The follow the instructions during install. Welcome to file Github issues to report bugs.
+
 ## Further config
 
 ### WSL2 fix
@@ -72,3 +109,10 @@ function wg_off () {
 Then hit `wg_on` when connected to your Wireguard tunnel and `wg_off` when off.
 
 It would be easy to quickly change this function if you want if to be automatically done. You could also implement some sort of auto detection, but I am quite happy to keep it manual.
+
+
+## Improvements
+
+- more versatile config
+- avoid use of any workarounds and only follow best practices
+- remote execution
