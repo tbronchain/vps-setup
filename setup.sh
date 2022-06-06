@@ -78,7 +78,9 @@ rm -f ./openvpn-install.sh
 # config wireguard
 sudo apt-get install -y wireguard wireguard-tools qrencode
 sudo mkdir -p /etc/wireguard
-sudo wg genkey | sudo tee /etc/wireguard/server.key | sudo wg pubkey | sudo tee /etc/wireguard/server.pub
+if [[ ! sudo test -f /etc/wireguard/server.key ]] || [[ ! sudo test -f /etc/wireguard/server.pub ]]; then
+    sudo wg genkey | sudo tee /etc/wireguard/server.key | sudo wg pubkey | sudo tee /etc/wireguard/server.pub
+fi
 (cat | sudo tee /etc/wireguard/wg0.conf) <<EOF
 [Interface]
 Address = 10.100.0.1/24, fd08:4711::1/64
@@ -137,7 +139,8 @@ if ! pihole -v; then
     rm -f pihole.sh
 else
     sudo pihole -up
-    sudo pihole -r
+    export PIHOLE_SKIP_OS_CHECK=true
+    sudo -E pihole -r
 fi
 
 
