@@ -151,11 +151,15 @@ else
     export PIHOLE_SKIP_OS_CHECK=true
     sudo -E pihole -r
 fi
+sudo cp -f conf/pihole/dnsmasq.d/* /etc/dnsmasq.d/
+sudo cp -f conf/pihole/etc/* /etc/pihole/
 
 
 # save rules
 sudo iptables-save | sudo tee /etc/pihole/rules.v4
 sudo ip6tables-save | sudo tee /etc/pihole/rules.v6
 
+
+echo "Install done, please reboot server to ensure everything is working."
 
 # EOF

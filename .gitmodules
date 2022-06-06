@@ -1,0 +1,4 @@
+[submodule "vendors/whitelist"]
+	path = vendors/whitelist
+	url = https://github.com/anudeepND/whitelist.git
+    branch = master
