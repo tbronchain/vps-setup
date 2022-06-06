@@ -19,6 +19,8 @@ What this is not: a full featured script that does everything for you
 
 What this is: a fairly minimal, comprehensive set of scripts you can use to setup a robust privacy oriented VPN server.
 
+Warning: latest changes might not be fully tested. Use at your own risks and please report issues.
+
 ## Requirements
 
 First, check `values.sh` and set what you need, but don't set private credentials. Alternatively, create a `.env` file and set whatever you want, including credentials.
