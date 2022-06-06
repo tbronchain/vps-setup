@@ -145,6 +145,10 @@ else
     export PIHOLE_SKIP_OS_CHECK=true
     sudo -E pihole -r
 fi
+sudo cp -f conf/pihole/dnsmasq.d/* /etc/dnsmasq.d/
+sudo cp -f conf/pihole/etc/* /etc/pihole/
 
+
+echo "Install done, please reboot server to ensure everything is working."
 
 # EOF
