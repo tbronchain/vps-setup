@@ -33,6 +33,12 @@ sudo ufw allow from any to ${PUBLIC_IP} port ${WIREGUARD_PORT}
 sudo cp -f conf/ufw/etc/* /etc/ufw/
 sudo cp -f conf/ufw/default/ufw /etc/default/ufw
 sudo ufw enable
+sudo iptables -A INPUT -p udp --dport 80 -j REJECT --reject-with icmp-port-unreachable
+sudo iptables -A INPUT -p tcp --dport 443 -j REJECT --reject-with tcp-reset
+sudo iptables -A INPUT -p udp --dport 443 -j REJECT --reject-with icmp-port-unreachable
+sudo ip6tables -A INPUT -p udp --dport 80 -j REJECT --reject-with icmp6-port-unreachable
+sudo ip6tables -A INPUT -p tcp --dport 443 -j REJECT --reject-with tcp-reset
+sudo ip6tables -A INPUT -p udp --dport 443 -j REJECT --reject-with icmp6-port-unreachable
 
 
 # config sendmail
@@ -145,6 +151,11 @@ else
     export PIHOLE_SKIP_OS_CHECK=true
     sudo -E pihole -r
 fi
+
+
+# save rules
+sudo iptables-save | sudo tee /etc/pihole/rules.v4
+sudo ip6tables-save | sudo tee /etc/pihole/rules.v6
 
 
 # EOF
