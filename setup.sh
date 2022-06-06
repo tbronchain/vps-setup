@@ -73,6 +73,9 @@ gen_ovpn_server_conf tcp ${OPENVPN_TCP_PORTS[@]}
 gen_ovpn_server_conf udp ${OPENVPN_UDP_PORTS[@]}
 gen_ovpn_server_conf udp --dns-only ${OPENVPN_UDP_DNS_PORTS[@]}
 rm -f ./openvpn-install.sh
+sudo cp -f conf/openvpn/openvpn-iptables.service /etc/systemd/system/openvpn-iptables.service
+sudo systemctl daemon-reload
+sudo systemctl restart openvpn-iptables
 
 
 # config wireguard
