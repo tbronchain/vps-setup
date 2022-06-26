@@ -25,32 +25,53 @@ function gen_ovpn_new_client () {
 function gen_wg_net_client () {
     _CLIENT_ID=2
     for _client in $@; do
-        sudo wg genkey | sudo tee "/etc/wireguard/${_client}.key" | sudo wg pubkey | sudo tee "/etc/wireguard/${_client}.pub"
-        sudo wg genpsk | sudo tee "/etc/wireguard/${_client}.psk"
-        {
-            echo "[Peer]"
-            echo "PublicKey = $(sudo cat /etc/wireguard/${_client}.pub)"
-            echo "PresharedKey = $(sudo cat /etc/wireguard/${_client}.psk)"
-            echo "AllowedIPs = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
-            #echo "AllowedIPs = 0.0.0.0/0, fd08:4711::${_CLIENT_ID}/128"
-            echo ""
-        } | sudo tee -a /etc/wireguard/wg0.conf
-        {
-            echo "[Interface]"
-            echo "Address = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
-            echo "DNS = 10.100.0.1"
-            echo "PrivateKey = $(sudo cat /etc/wireguard/${_client}.key)"
-            echo ""
-#AllowedIPs = 10.100.0.1/32, fd08:4711::1/128
-            cat <<EOF
+        if [[ -f "${OUTDIR}"/"wg_${_client}".conf ]]; then
+            echo "config ${OUTDIR}/wg_${_client}.conf found"
+        else
+            echo "config ${OUTDIR}/wg_${_client}.conf not found, generating..."
+            sudo wg genkey | sudo tee "/etc/wireguard/${_client}.key" | sudo wg pubkey | sudo tee "/etc/wireguard/${_client}.pub"
+            sudo wg genpsk | sudo tee "/etc/wireguard/${_client}.psk"
+            {
+                echo "[Peer]"
+                echo "PublicKey = $(sudo cat /etc/wireguard/${_client}.pub)"
+                echo "PresharedKey = $(sudo cat /etc/wireguard/${_client}.psk)"
+                echo "AllowedIPs = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
+                #echo "AllowedIPs = 0.0.0.0/0, fd08:4711::${_CLIENT_ID}/128"
+                echo ""
+            } | sudo tee -a /etc/wireguard/wg0.conf
+            {
+                echo "[Interface]"
+                echo "Address = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
+                echo "DNS = 10.100.0.1"
+                echo "PrivateKey = $(sudo cat /etc/wireguard/${_client}.key)"
+                echo ""
+                #AllowedIPs = 10.100.0.1/32, fd08:4711::1/128
+                cat <<EOF
 [Peer]
 AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = ${PUBLIC_IP}:${WIREGUARD_PORT}
 PersistentKeepalive = 25
 EOF
-            echo "PublicKey = $(sudo cat /etc/wireguard/server.pub)"
-            echo "PresharedKey = $(sudo cat /etc/wireguard/${_client}.psk)"
-        } > "${OUTDIR}"/"wg_${_client}".conf
+                echo "PublicKey = $(sudo cat /etc/wireguard/server.pub)"
+                echo "PresharedKey = $(sudo cat /etc/wireguard/${_client}.psk)"
+            } > "${OUTDIR}"/"wg_${_client}".conf
+            {
+                echo "[Interface]"
+                echo "Address = 10.100.0.${_CLIENT_ID}/32, fd08:4711::${_CLIENT_ID}/128"
+                echo "DNS = 10.100.0.1"
+                echo "PrivateKey = $(sudo cat /etc/wireguard/${_client}.key)"
+                echo ""
+                #AllowedIPs = 10.100.0.1/32, fd08:4711::1/128
+                cat <<EOF
+[Peer]
+AllowedIPs = 10.100.0.0/16, fd08:4711::1/64
+Endpoint = ${PUBLIC_IP}:${WIREGUARD_PORT}
+PersistentKeepalive = 25
+EOF
+                echo "PublicKey = $(sudo cat /etc/wireguard/server.pub)"
+                echo "PresharedKey = $(sudo cat /etc/wireguard/${_client}.psk)"
+            } > "${OUTDIR}"/"wg_${_client}_dnsonly".conf
+        fi
         _CLIENT_ID=$((_CLIENT_ID+1))
     done
     sudo systemctl restart wg-quick@wg0
