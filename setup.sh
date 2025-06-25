@@ -21,7 +21,7 @@ fi
 echo $SSH_PORT
 envsubst < conf/ssh/sshd_config > ${OUTDIR}/tmp/sshd_config
 sudo cp ${OUTDIR}/tmp/sshd_config /etc/ssh/sshd_config
-sudo systemctl restart sshd
+sudo systemctl restart sshd || sudo systemctl restart ssh
 
 
 # configure ufw firewall
