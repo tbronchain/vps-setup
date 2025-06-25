@@ -10,9 +10,11 @@ mkdir -p "${OUTDIR}/tmp"
 
 sudo bash -ex scripts/bootstrap.sh
 
-export PUBLIC_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
-export ANCHOR_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/anchor_ipv4/address)
-export PUBLIC6_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv6/address)
+if [[ $METAD -eq 1 ]]; then
+    export PUBLIC_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+    export ANCHOR_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/anchor_ipv4/address)
+    export PUBLIC6_IP=$(curl -s 169.254.169.254/metadata/v1/interfaces/public/0/ipv6/address)
+fi
 
 
 # configure ssh
