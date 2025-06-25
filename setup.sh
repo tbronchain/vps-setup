@@ -33,6 +33,8 @@ for _PORT in "${OPENVPN_ALL_PORTS[@]}"; do
     sudo ufw allow from any to ${PUBLIC_IP} port ${_PORT}
 done
 sudo ufw allow from any to ${PUBLIC_IP} port ${WIREGUARD_PORT}
+sudo ufw allow from 127.0.0.1 to 127.0.0.1 port 5335
+sudo ufw allow from 127.0.0.1 to 127.0.0.1 port 5053
 sudo cp -f conf/ufw/etc/* /etc/ufw/
 sudo cp -f conf/ufw/default/ufw /etc/default/ufw
 sudo ufw enable
