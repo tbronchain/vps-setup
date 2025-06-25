@@ -142,12 +142,13 @@ wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudfla
 sudo apt install -y ./cloudflared-linux-amd64.deb
 rm -f ./cloudflared-linux-amd64.deb
 cloudflared -v
-if ! grep cloudflared /etc/passwd; then
+ if ! grep cloudflared /etc/passwd; then
     sudo useradd -s /usr/sbin/nologin -r -M cloudflared
 fi
 (cat | sudo tee /etc/default/cloudflared) <<EOF
 # Commandline args for cloudflared, using Cloudflare DNS
 CLOUDFLARED_OPTS="--port 5053 --upstream https://1.1.1.1/dns-query --upstream https://1.0.0.1/dns-query"
+TUNNEL_DNS_PORT="5053"
 EOF
 sudo chown cloudflared:cloudflared /etc/default/cloudflared
 sudo chown cloudflared:cloudflared /usr/local/bin/cloudflared
