@@ -92,7 +92,7 @@ sudo systemctl restart openvpn-iptables
 # config wireguard
 sudo apt-get install -y wireguard wireguard-tools qrencode
 sudo mkdir -p /etc/wireguard
-if [[ ! sudo test -f /etc/wireguard/server.key ]] || [[ ! sudo test -f /etc/wireguard/server.pub ]]; then
+if ! sudo test -f /etc/wireguard/server.key || ! sudo test -f /etc/wireguard/server.pub ; then
     sudo wg genkey | sudo tee /etc/wireguard/server.key | sudo wg pubkey | sudo tee /etc/wireguard/server.pub
 fi
 (cat | sudo tee /etc/wireguard/wg0.conf) <<EOF
