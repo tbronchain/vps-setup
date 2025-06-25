@@ -133,7 +133,7 @@ echo 'edns-packet-max=1232' | sudo tee /etc/dnsmasq.d/99-edns.conf
 sudo systemctl enable unbound
 sudo systemctl restart unbound
 dig pi-hole.net @127.0.0.1 -p 5335
-dig sigfail.verteiltesysteme.net @127.0.0.1 -p 5335
+dig sigfail.verteiltesysteme.net @127.0.0.1 -p 5335 || echo "fail OK"
 dig sigok.verteiltesysteme.net @127.0.0.1 -p 5335
 
 
