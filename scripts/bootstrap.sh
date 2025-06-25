@@ -5,11 +5,13 @@
 apt update
 apt -y install ca-certificates curl gnupg lsb-release
 mkdir -p /etc/apt/keyrings
-if apt-key list | grep A4C6383F; then
-    apt-key export A4C6383F | gpg --dearmour -o /etc/apt/keyrings/digitalocean-agent.gpg
-    cat > /etc/apt/sources.list.d/digitalocean-agent.list <<EOF
+if [[ $METAD -eq 1 ]]; then
+    if apt-key list | grep A4C6383F; then
+        apt-key export A4C6383F | gpg --dearmour -o /etc/apt/keyrings/digitalocean-agent.gpg
+        cat > /etc/apt/sources.list.d/digitalocean-agent.list <<EOF
 deb [arch=amd64 signed-by=/etc/apt/keyrings/digitalocean-agent.gpg] https://repos.insights.digitalocean.com/apt/do-agent main main
 EOF
+    fi
 fi
 rm -f /etc/apt/keyrings/docker.gpg
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
