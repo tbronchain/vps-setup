@@ -123,6 +123,6 @@ EOF
 function ufw_vpn_rules () {
     local _NETWORK="$1"
 
-    sudo ufw allow in from ${_NETWORK} to any port 53 proto udp
-    sudo ufw allow in from ${_NETWORK} to any port 80,6666,8080,2342 proto tcp
+    sudo ufw allow in from ${_NETWORK} to any port 53,33123 proto udp
+    sudo ufw allow in from ${_NETWORK} to any port 80,443,6666,8080,2342 proto tcp
 }
