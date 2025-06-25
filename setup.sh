@@ -154,8 +154,9 @@ sudo chown cloudflared:cloudflared /etc/default/cloudflared
 sudo chown cloudflared:cloudflared /usr/local/bin/cloudflared
 envsubst < conf/cloudflared/cloudflared.service | sudo tee /etc/systemd/system/cloudflared.service
 sudo systemctl enable cloudflared
-sudo systemctl start cloudflared
+sudo systemctl restart cloudflared
 sudo systemctl status cloudflared
+sleep 2
 dig @127.0.0.1 -p 5053 google.com
 
 
