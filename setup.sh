@@ -47,6 +47,7 @@ sudo ip6tables -A INPUT -p udp --dport 443 -j REJECT --reject-with icmp6-port-un
 # config sendmail
 sudo mkdir -p /etc/mail/authinfo
 sudo chmod 700 /etc/mail/authinfo
+sudo touch /etc/mail/authinfo/smtp-auth
 sudo chmod 600 /etc/mail/authinfo/smtp-auth
 (cat | sudo tee /etc/mail/authinfo/smtp-auth) <<EOF
 AuthInfo: "U:root" "I:${SENDER_EMAIL}" "P:${SMTP_PASSWD}"
